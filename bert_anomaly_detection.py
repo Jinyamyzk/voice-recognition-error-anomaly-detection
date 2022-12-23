@@ -5,8 +5,12 @@ from torch import nn
 
 import pandas as pd
 import copy
+from tqdm import tqdm
 import warnings
+
+tqdm.pandas()
 warnings.simplefilter("ignore")
+
 
 def fill_mask(model,  tokenizer, masked_text):
     inputs = tokenizer(masked_text, return_tensors="pt").to(device)
@@ -16,7 +20,23 @@ def fill_mask(model,  tokenizer, masked_text):
     predicted_token_ids = output.logits[0, mask_token_index]
     return predicted_token_ids
 
-def eval_model(text, label, model, tokenizer, softmax):
+def preprocess_label(label):
+    """ラベルの要素が文字列になっているので数字に直す"""
+    table = str.maketrans({
+    "[": "",
+    "]": "",
+    })
+    label = [int(l.translate(table)) for l in label.split(",")]
+    return torch.tensor(label)
+
+def eval_model(row, model, tokenizer, softmax):
+    """
+    モデルを評価。AccuracyとRecallを返す
+    """
+    text = row["text"]
+    label = row["label"]
+    label = preprocess_label(label)
+
     MASK_TOKEN = tokenizer.mask_token
     tokens = tokenizer.tokenize(text)
     result = []
@@ -31,19 +51,14 @@ def eval_model(text, label, model, tokenizer, softmax):
         top_k = torch.topk(probes[0], k=50)
         result.append(int(token_id in top_k.indices.tolist()))
     result = torch.tensor(result)
-    len_label = len(label) 
-    label = torch.tensor(label)
+    len_label = len(label)
     accuracy = torch.sum(result==label) / len_label
     num_positive = torch.sum(label)
     label = torch.where(label < 0.5, -1, 1)
     recall = torch.sum(result==label) / num_positive
+    return pd.Series([accuracy, recall])
 
-    # return pd.Series([accuracy, recall])
-    return accuracy, recall
-
-
-
-def main():
+def main(df):
     model = BertForMaskedLM.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
     tokenizer = BertJapaneseTokenizer.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
     softmax = nn.Softmax(dim=1)
@@ -51,17 +66,17 @@ def main():
     model.to(device)
     model.eval()
 
-    text = "どうして男の人って、テレビをつけたまま寝るんだろう契約社員の佳子さんが、とある飲み会でぽろっとつぶやいたところ、その場にいたほぼ全員の女性が、そうそうホント、やくめてほしいよねからといっせいやくにす同調したという周囲の女性たちの反応に、TVをつけっぱなしで寝る男にイラッとしているのは自分だけではない、と意を強くした佳子さん私の彼は、すごくテレビ好きなんですよ"
-    label = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    df[["accuracy", "recall"]] = df.progress_apply(eval_model, args=(model, tokenizer, softmax,), axis=1)
+        
+    print(f"Accuracy: {df.accuracy.mean()}, Recall: {df.recall.mean()}")
 
-    accuracy, recall =  eval_model(text, label, model, tokenizer, softmax)
-
-    
-    print(f"Accuracy: {accuracy}, Recall: {recall}")
 
 if __name__ == "__main__":
     # GPUが使えるかを確認
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("使用デバイス：", device)
     print('-----start-------')
-    main()
+
+    df = pd.read_csv("livedoor_noised_data.tsv", sep="\t", names=["text", "label"])
+    df = df.head(5) # For debugging
+    main(df)
