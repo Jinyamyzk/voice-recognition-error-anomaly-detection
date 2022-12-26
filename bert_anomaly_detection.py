@@ -6,6 +6,7 @@ from torch import nn
 
 import pandas as pd
 import copy
+import csv
 from tqdm import tqdm
 import warnings
 
@@ -79,7 +80,12 @@ def main(df):
         f2 = 5 * precision * recall / (4 * precision + recall)
         results.append([topk, accuracy, precision, recall, f1, f2])
     for r in results:
-        print(f"TOPK: {r[0]}, Accuracy: {r[1]}, Precision: {r[2]},Recall: {r[3]}, F1: {r[4]}, F2: {r[5]}")
+        print(f"TopK: {r[0]}, Accuracy: {r[1]}, Precision: {r[2]},Recall: {r[3]}, F1: {r[4]}, F2: {r[5]}")
+    with open("result.csv", "w") as f:
+        writer = csv.writer(f)
+        writer.writerow(["TopK", "Accuracy", "Precision", "Recall", "F1", "F2"])
+        writer.writerows(results)
+
 
 
 if __name__ == "__main__":
@@ -87,7 +93,6 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("使用デバイス：", device)
     print('-----start-------')
-
     df = pd.read_csv("livedoor_noised_data.tsv", sep="\t", names=["text", "label"])
-    df = df.head(5) # For debugging
+    # df = df.head(5) # For debugging
     main(df)
