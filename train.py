@@ -79,6 +79,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
                         
 
                     iteration += 1
+                    print(f"Iteration: {iteration}")
                     # 損失と正解数の合計を更新
                     epoch_loss += loss.item() * batch_size
             # epochごとのlossと正解率
