@@ -107,7 +107,7 @@ def main():
         dataset_test, batch_size=batch_size, train=False, sort=False)
 
     # 辞書オブジェクトにまとめる
-    dataloaders_dict = {"train": dl_train, "val": dl_valid}
+    dataloaders_dict = {"train": dl_test, "val": dl_valid}
 
     net = BertForMaskedLM.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
     # 訓練モードに設定
