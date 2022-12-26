@@ -53,10 +53,11 @@ def eval_model(row, model, tokenizer, softmax):
     result = torch.tensor(result)
     len_label = len(label)
     accuracy = torch.sum(result==label) / len_label
-    num_positive = torch.sum(label)
+    num_positive = torch.sum(label) 
     label = torch.where(label < 0.5, -1, 1)
     recall = torch.sum(result==label) / num_positive
-    return pd.Series([accuracy, recall])
+    precision = torch.sum(result==label) / torch.sum(result)
+    return pd.Series([accuracy, precision, recall])
 
 def main(df):
     model = BertForMaskedLM.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
@@ -66,9 +67,13 @@ def main(df):
     model.to(device)
     model.eval()
 
-    df[["accuracy", "recall"]] = df.progress_apply(eval_model, args=(model, tokenizer, softmax,), axis=1)
-        
-    print(f"Accuracy: {df.accuracy.mean()}, Recall: {df.recall.mean()}")
+    df[["accuracy", "precision", "recall"]] = df.progress_apply(eval_model, args=(model, tokenizer, softmax,), axis=1)
+    accuracy = df.accuracy.mean()
+    precision = df.precision.mean()
+    recall = df.recall.mean()
+    f1 = 2 * precision * recall / (precision + recall)
+
+    print(f"Accuracy: {accuracy}, Precision: {precision},Recall: {recall}, F1: {f1}")
 
 
 if __name__ == "__main__":
