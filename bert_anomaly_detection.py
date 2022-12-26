@@ -93,7 +93,7 @@ def main(df, model_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("model_path", default=None)
+    parser.add_argument("-m", "--model_path", default=None)
     args = parser.parse_args()
     main(args.model_path)
 
