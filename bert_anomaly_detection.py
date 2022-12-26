@@ -1,4 +1,3 @@
-from itertools import accumulate
 from transformers import BertForMaskedLM
 from transformers import BertJapaneseTokenizer
 import torch
@@ -63,6 +62,8 @@ def eval_model(row, model, tokenizer, softmax, top_k):
 
 def main(df):
     model = BertForMaskedLM.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
+    state_dict = torch.load("model/model_trained.pt")
+    model.load_state_dict(state_dict)
     tokenizer = BertJapaneseTokenizer.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
     softmax = nn.Softmax(dim=1)
 
