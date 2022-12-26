@@ -53,7 +53,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
             iteration = 1
             # データローダーからミニバッチを取り出すループ
             for batch in (dataloaders_dict[phase]):
-                labels = batch.Text[0].to(device)
+                labels = batch.Text[0]
                 inputs = mask_text(batch.Text[0]).to(device)
                 attn_mask = torch.where(inputs==0, 0, 1).to(device) # attention maskの作成
             
@@ -68,7 +68,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
                     print(outputs.size())
 
                     labels = labels.reshape(-1,1)
-                    labels = torch.squeeze(labels)
+                    labels = torch.squeeze(labels).to(device)
                     print(labels.size())
 
                     loss = criterion(outputs, labels)
@@ -99,7 +99,7 @@ def main():
             ("Text", TEXT)])
     
     # DataLoaderを作成します（torchtextの文脈では単純にiteraterと呼ばれています）
-    batch_size = 8 # BERTでは16、32あたりを使用する
+    batch_size = 4 # BERTでは16、32あたりを使用する
 
     dl_train = data.Iterator(
         dataset_train, batch_size=batch_size, train=True)
