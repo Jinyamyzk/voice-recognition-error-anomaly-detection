@@ -53,7 +53,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
             iteration = 1
             # データローダーからミニバッチを取り出すループ
             for batch in (dataloaders_dict[phase]):
-                labels = batch.Text[0].unsqueeze(1).to(device)
+                labels = batch.Text[0].to(device)
                 inputs = mask_text(batch.Text[0]).to(device)
                 attn_mask = torch.where(inputs==0, 0, 1).to(device) # attention maskの作成
             
@@ -64,6 +64,11 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = net(input_ids=inputs, attention_mask=attn_mask).logits
                     print(outputs.size())
+                    outputs = outputs.reshape(-1,32000)
+                    print(outputs.size())
+
+                    labels = labels.reshape(-1,1)
+                    print(labels.size())
 
                     loss = criterion(outputs, labels)
                     # 訓練時はバックプロパゲーション
