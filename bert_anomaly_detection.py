@@ -6,6 +6,7 @@ from torch import nn
 import pandas as pd
 import copy
 import csv
+import argparse
 from tqdm import tqdm
 import warnings
 
@@ -60,10 +61,11 @@ def eval_model(row, model, tokenizer, softmax, top_k):
     precision = torch.sum(result==label) / torch.sum(result)
     return pd.Series([accuracy, precision, recall])
 
-def main(df):
+def main(df, model_path):
     model = BertForMaskedLM.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
-    state_dict = torch.load("model/model_trained.pt")
-    model.load_state_dict(state_dict)
+    if model_path:
+        state_dict = torch.load(model_path)
+        model.load_state_dict(state_dict)
     tokenizer = BertJapaneseTokenizer.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
     softmax = nn.Softmax(dim=1)
 
@@ -90,10 +92,15 @@ def main(df):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("model_path", default=None)
+    args = parser.parse_args()
+    main(args.model_path)
+
     # GPUが使えるかを確認
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("使用デバイス：", device)
     print('-----start-------')
     df = pd.read_csv("livedoor_noised_data.tsv", sep="\t", names=["text", "label"])
     df = df.head(5) # For debugging
-    main(df)
+    main(df, args.model_path)
