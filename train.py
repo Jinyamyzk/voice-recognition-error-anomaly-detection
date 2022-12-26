@@ -68,7 +68,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
                     print(outputs.size())
 
                     labels = labels.reshape(-1,1)
-                    labels = labels.squeeze(labels)
+                    labels = torch.squeeze(labels)
                     print(labels.size())
 
                     loss = criterion(outputs, labels)
