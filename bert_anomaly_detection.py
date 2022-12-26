@@ -1,3 +1,4 @@
+from itertools import accumulate
 from transformers import BertForMaskedLM
 from transformers import BertJapaneseTokenizer
 import torch
@@ -29,7 +30,7 @@ def preprocess_label(label):
     label = [int(l.translate(table)) for l in label.split(",")]
     return torch.tensor(label)
 
-def eval_model(row, model, tokenizer, softmax):
+def eval_model(row, model, tokenizer, softmax, top_k):
     """
     モデルを評価。AccuracyとRecallを返す
     """
@@ -48,8 +49,8 @@ def eval_model(row, model, tokenizer, softmax):
         masked_text = "".join(tokens_).replace('#', '')
         preds = fill_mask(model, tokenizer, masked_text)
         probes = softmax(preds)
-        top_k = torch.topk(probes[0], k=50)
-        result.append(int(token_id in top_k.indices.tolist()))
+        top_k_words = torch.topk(probes[0], k=top_k)
+        result.append(int(token_id in top_k_words.indices.tolist()))
     result = torch.tensor(result)
     len_label = len(label)
     accuracy = torch.sum(result==label) / len_label
@@ -67,13 +68,18 @@ def main(df):
     model.to(device)
     model.eval()
 
-    df[["accuracy", "precision", "recall"]] = df.progress_apply(eval_model, args=(model, tokenizer, softmax,), axis=1)
-    accuracy = df.accuracy.mean()
-    precision = df.precision.mean()
-    recall = df.recall.mean()
-    f1 = 2 * precision * recall / (precision + recall)
-
-    print(f"Accuracy: {accuracy}, Precision: {precision},Recall: {recall}, F1: {f1}")
+    results = []
+    topk_candidates = [10, 20, 30, 40, 50]
+    for topk in topk_candidates:
+        df[["accuracy", "precision", "recall"]] = df.progress_apply(eval_model, args=(model, tokenizer, softmax, topk,), axis=1)
+        accuracy = df.accuracy.mean()
+        precision = df.precision.mean()
+        recall = df.recall.mean()
+        f1 = 2 * precision * recall / (precision + recall)
+        f2 = 5 * precision * recall / (4 * precision + recall)
+        results.append([topk, accuracy, precision, recall, f1, f2])
+    for r in results:
+        print(f"TOPK: {r[0]}, Accuracy: {r[1]}, Precision: {r[2]},Recall: {r[3]}, F1: {r[4]}, F2: {r[5]}")
 
 
 if __name__ == "__main__":
