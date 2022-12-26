@@ -92,7 +92,7 @@ def main():
                                 include_lengths=True, batch_first=True, fix_length=MAX_LENGTH, pad_token=0)
 
     dataset_train, dataset_valid, dataset_test = data.TabularDataset.splits(
-        path="livedoor4finetune", train="train.tsv", validation="valid.tsv",test="test.tsv", format="tsv", fields=[
+        path="livedoor4finetune", train="train_mini.tsv", validation="valid.tsv",test="test.tsv", format="tsv", fields=[
             ("Text", TEXT)])
     
     # DataLoaderを作成します（torchtextの文脈では単純にiteraterと呼ばれています）
@@ -108,7 +108,7 @@ def main():
         dataset_test, batch_size=batch_size, train=False, sort=False)
 
     # 辞書オブジェクトにまとめる
-    dataloaders_dict = {"train": dl_test, "val": dl_valid}
+    dataloaders_dict = {"train": dl_train, "val": dl_valid}
 
     net = BertForMaskedLM.from_pretrained("cl-tohoku/bert-base-japanese-whole-word-masking")
     # 訓練モードに設定
