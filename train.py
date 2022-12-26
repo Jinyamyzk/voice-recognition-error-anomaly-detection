@@ -63,12 +63,9 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
                 # 順伝搬（forward）計算
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = net(input_ids=inputs, attention_mask=attn_mask).logits
-                    print(outputs.size())
                     outputs = outputs.reshape(-1,32000)
-                    print(outputs.size())
 
                     labels = torch.flatten(labels).to(device)
-                    print(labels.size())
 
                     loss = criterion(outputs, labels)
                     # 訓練時はバックプロパゲーション
