@@ -95,7 +95,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model_path")
     args = parser.parse_args()
-    main(args.model_path)
 
     # GPUが使えるかを確認
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
