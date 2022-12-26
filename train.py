@@ -67,8 +67,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
                     outputs = outputs.reshape(-1,32000)
                     print(outputs.size())
 
-                    labels = labels.reshape(-1,1)
-                    labels = torch.squeeze(labels).to(device)
+                    labels = torch.flatten(labels).to(device)
                     print(labels.size())
 
                     loss = criterion(outputs, labels)
@@ -99,7 +98,7 @@ def main():
             ("Text", TEXT)])
     
     # DataLoaderを作成します（torchtextの文脈では単純にiteraterと呼ばれています）
-    batch_size = 4 # BERTでは16、32あたりを使用する
+    batch_size = 8 # BERTでは16、32あたりを使用する
 
     dl_train = data.Iterator(
         dataset_train, batch_size=batch_size, train=True)
