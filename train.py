@@ -63,6 +63,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
                 # 順伝搬（forward）計算
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = net(input_ids=inputs, attention_mask=attn_mask).logits
+                    print(outputs.size())
 
                     loss = criterion(outputs, labels)
                     # 訓練時はバックプロパゲーション
@@ -102,11 +103,7 @@ def main():
 
     dl_test = data.Iterator(
         dataset_test, batch_size=batch_size, train=False, sort=False)
-
-    # DataLoaderの動作確認
-    batch = next(iter(dl_test))
-    print(batch)
-
+        
     # 辞書オブジェクトにまとめる
     dataloaders_dict = {"train": dl_train, "val": dl_valid}
 
