@@ -22,6 +22,7 @@ def mask_text(text_ids):
         inp[token_to_mask] = 4
         input_ids.append(inp)
     input_ids = torch.tensor(input_ids)
+    return input_ids
 
 
 
