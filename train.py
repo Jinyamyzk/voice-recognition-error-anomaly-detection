@@ -114,7 +114,7 @@ def main():
     net.train()
 
     optimizer = optim.Adam([
-        {"parmas": net.parameters(), "lr": 5e-5},
+        {"params": net.parameters(), "lr": 5e-5},
     ])
 
     criterion = nn.CrossEntropyLoss()
