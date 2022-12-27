@@ -95,7 +95,7 @@ def main():
             ("Text", TEXT)])
     
     # DataLoaderを作成します（torchtextの文脈では単純にiteraterと呼ばれています）
-    batch_size = 4 # BERTでは16、32あたりを使用する
+    batch_size = 16 # BERTでは16、32あたりを使用する
 
     dl_train = data.Iterator(
         dataset_train, batch_size=batch_size, train=True)
@@ -113,8 +113,15 @@ def main():
     # 訓練モードに設定
     net.train()
 
+    # 1. まず全部を、勾配計算Falseにしてしまう
+    for param in net.parameters():
+        param.requires_grad = False
+    # 2. BertOnlyMLMHeadだけ勾配計算Trueに変更
+    for param in net.cls.parameters():
+        param.requires_grad = True
+    
     optimizer = optim.Adam([
-        {"params": net.parameters(), "lr": 5e-5},
+        {"params": net.cls.parameters(), "lr": 5e-5}, 
     ])
 
     criterion = nn.CrossEntropyLoss()
