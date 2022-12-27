@@ -100,6 +100,6 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("使用デバイス：", device)
     print('-----start-------')
-    df = pd.read_csv("livedoor_noised_data.tsv", sep="\t", names=["text", "label"])
-    df = df.head(10) # For debugging
+    df = pd.read_csv("livedoor/test.tsv", sep="\t", names=["text", "label"])
+    # df = df.head(10) # For debugging
     main(df, args.model_path)
