@@ -55,10 +55,10 @@ def eval_model(row, model, tokenizer, softmax, top_k):
     result = torch.tensor(result)
     len_label = len(label)
     accuracy = torch.sum(result==label) / len_label
-    num_positive = torch.sum(label) 
+    num_positive = torch.sum(label)
     label = torch.where(label < 0.5, -1, 1)
-    recall = torch.sum(result==label) / num_positive
-    precision = torch.sum(result==label) / torch.sum(result)
+    recall = torch.sum(result==label) / num_positive if num_positive != 0 else 0.0 # Avoid ZeroDivisionError
+    precision = torch.sum(result==label) / torch.sum(result) if torch.sum(result) != 0 else 0.0
     return pd.Series([accuracy, precision, recall])
 
 def main(df, model_path):
