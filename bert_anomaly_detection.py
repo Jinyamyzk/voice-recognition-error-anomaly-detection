@@ -51,7 +51,7 @@ def eval_model(row, model, tokenizer, softmax, top_k):
         preds = fill_mask(model, tokenizer, masked_text)
         probes = softmax(preds)
         top_k_words = torch.topk(probes[0], k=top_k)
-        result.append(int(token_id in top_k_words.indices.tolist()))
+        result.append(int(token_id not in top_k_words.indices.tolist()))
     result = torch.tensor(result)
     len_label = len(label)
     accuracy = torch.sum(result==label) / len_label
@@ -73,7 +73,7 @@ def main(df, model_path):
     model.eval()
 
     results = []
-    topk_candidates = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
+    topk_candidates = [10, 20, 30, 40, 50, 100]
     for topk in topk_candidates:
         df[["accuracy", "precision", "recall"]] = df.progress_apply(eval_model, args=(model, tokenizer, softmax, topk,), axis=1)
         accuracy = df.accuracy.mean()
