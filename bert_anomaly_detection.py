@@ -73,7 +73,7 @@ def main(df, model_path):
     model.eval()
 
     results = []
-    topk_candidates = [40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 200, 300, 400]
+    topk_candidates = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
     for topk in topk_candidates:
         df[["accuracy", "precision", "recall"]] = df.progress_apply(eval_model, args=(model, tokenizer, softmax, topk,), axis=1)
         accuracy = df.accuracy.mean()
@@ -83,7 +83,7 @@ def main(df, model_path):
         f2 = 5 * precision * recall / (4 * precision + recall)
         results.append([topk, accuracy, precision, recall, f1, f2])
     for r in results:
-        print(f"TopK: {r[0]}, Accuracy: {r[1]}, Precision: {r[2]},Recall: {r[3]}, F1: {r[4]}, F2: {r[5]}")
+        print(f"TopK: {r[0]:.4f}, Accuracy: {r[1]:.4f}, Precision: {r[2]:.4f},Recall: {r[3]:.4f}, F1: {r[4]:.4f}, F2: {r[5]:.4f}")
     with open("result.csv", "w") as f:
         writer = csv.writer(f)
         writer.writerow(["TopK", "Accuracy", "Precision", "Recall", "F1", "F2"])
