@@ -95,7 +95,7 @@ def main():
             ("Text", TEXT)])
     
     # DataLoaderを作成します（torchtextの文脈では単純にiteraterと呼ばれています）
-    batch_size = 16 # BERTでは16、32あたりを使用する
+    batch_size = 8 # BERTでは16、32あたりを使用する
 
     dl_train = data.Iterator(
         dataset_train, batch_size=batch_size, train=True)
