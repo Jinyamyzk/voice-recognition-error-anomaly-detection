@@ -73,7 +73,7 @@ def main(df, model_path):
     model.eval()
 
     results = []
-    topk_candidates = [10, 20, 30, 40, 50]
+    topk_candidates = [10, 20, 30, 40, 50, 60, 70, 80]
     for topk in topk_candidates:
         df[["accuracy", "precision", "recall"]] = df.progress_apply(eval_model, args=(model, tokenizer, softmax, topk,), axis=1)
         accuracy = df.accuracy.mean()
