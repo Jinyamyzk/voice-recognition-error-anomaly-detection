@@ -101,5 +101,5 @@ if __name__ == "__main__":
     print("使用デバイス：", device)
     print('-----start-------')
     df = pd.read_csv("livedoor_noised_data.tsv", sep="\t", names=["text", "label"])
-    df = df.head(5) # For debugging
+    df = df.head(10) # For debugging
     main(df, args.model_path)
