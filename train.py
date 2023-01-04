@@ -91,7 +91,7 @@ def main():
                                 include_lengths=True, batch_first=True, fix_length=MAX_LENGTH, pad_token=0)
 
     dataset_train, dataset_valid, dataset_test = data.TabularDataset.splits(
-        path="noised4finetune", train="train.tsv", validation="valid.tsv",test="test.tsv", format="tsv", fields=[
+        path="btsj4finetune", train="train.tsv", validation="valid.tsv",test="test.tsv", format="tsv", fields=[
             ("Text", TEXT)])
     
     # DataLoaderを作成します（torchtextの文脈では単純にiteraterと呼ばれています）
@@ -114,14 +114,18 @@ def main():
     net.train()
 
     # 1. まず全部を、勾配計算Falseにしてしまう
-    for param in net.parameters():
-        param.requires_grad = False
+    # for param in net.parameters():
+    #     param.requires_grad = False
     # 2. BertOnlyMLMHeadだけ勾配計算Trueに変更
-    for param in net.cls.parameters():
+    # for param in net.cls.parameters():
+    #     param.requires_grad = True
+
+    # 全部を、勾配計算Trueにしてしまう
+    for param in net.parameters():
         param.requires_grad = True
     
     optimizer = optim.Adam([
-        {"params": net.cls.parameters(), "lr": 5e-5}, 
+        {"params": net.parameters(), "lr": 5e-5}, 
     ])
 
     criterion = nn.CrossEntropyLoss()
