@@ -121,8 +121,8 @@ def main():
     #     param.requires_grad = True
 
     # 全部を、勾配計算Trueにしてしまう
-    for param in net.parameters():
-        param.requires_grad = True
+    # for param in net.parameters():
+    #     param.requires_grad = True
     
     optimizer = optim.Adam([
         {"params": net.parameters(), "lr": 5e-5}, 
