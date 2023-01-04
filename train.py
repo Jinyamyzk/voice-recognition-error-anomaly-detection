@@ -120,7 +120,7 @@ def main():
     for param in net.cls.parameters():
         param.requires_grad = True
     # 3. BertLayerモジュールの最後を勾配計算ありに変更
-    for param in net.encoder.layer[-1].parameters():
+    for param in net.bert.encoder.layer[-1].parameters():
         param.requires_grad = True
 
     # 全部を、勾配計算Trueにしてしまう
