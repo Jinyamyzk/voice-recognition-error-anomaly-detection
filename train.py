@@ -114,23 +114,27 @@ def main():
     net.train()
 
     # 1. まず全部を、勾配計算Falseにしてしまう
-    # for param in net.parameters():
-    #     param.requires_grad = False
+    for param in net.parameters():
+        param.requires_grad = False
     # 2. BertOnlyMLMHeadだけ勾配計算Trueに変更
-    # for param in net.cls.parameters():
-    #     param.requires_grad = True
+    for param in net.cls.parameters():
+        param.requires_grad = True
+    # 3. BertLayerモジュールの最後を勾配計算ありに変更
+    for param in net.encoder.layer[-1].parameters():
+        param.requires_grad = True
 
     # 全部を、勾配計算Trueにしてしまう
     # for param in net.parameters():
     #     param.requires_grad = True
     
     optimizer = optim.Adam([
-        {"params": net.parameters(), "lr": 5e-5}, 
+        {'params': net.bert.encoder.layer[-1].parameters(), 'lr': 5e-5},
+        {"params": net.cls.parameters(), "lr": 5e-5}, 
     ])
 
     criterion = nn.CrossEntropyLoss()
 
-    num_epochs = 3
+    num_epochs = 5
     net_trained = train_model(net, dataloaders_dict, criterion, optimizer, num_epochs)
 
     # モデルの保存
